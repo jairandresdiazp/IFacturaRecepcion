@@ -1,0 +1,315 @@
+{
+	"info": {
+		"_postman_id": "2503e56b-49c0-40f0-b4af-3567af09ed02",
+		"name": "IFacturaRecepcion",
+		"description": "se describe el servicio que el cliente debe publicar en internet para la recepcion de documentos enviados por parte de transfiriendo S.A\n\n# Autenticacion\n\nel servicio expuesto por el cliente debe manejar una token estatico el cual sera enviando por tranfiriendo S.A, este token se enviara en una cabecera de la siguiente forma.\n\n```javascript\n{\n  \"cache-control\": \"no-cache\",\n  \"Content-Type\": \"application/json\",\n  \"Authorization\": \"{{Token}}\"\n}\n```\n\n# Seguridad \n\nel servicio debe estar publicado con el protocolo HTTPS\n\n# Respuestas\n\nel servicio debe dar respuestas de la siguiente forma\n\n| Codigo HTTP | Descripcion |\n| ------ | ------ |\n| 200 | la transacion fue exitosa |\n| 401 | no se logro verificar el token |\n| 500 | la transaccion no fue exitosa |\n\n# Estructura de los mensajes de respuesta\n\n## 200\n\n```javascript\n{\n  \"error\": false,\n  \"descripcion\":\"mensaje respectivo a la entrega cadena de texto no mayor a 200 caracteres\"\n}\n```\n\n## 401\n\n```javascript\n{\n  \"error\": true,\n  \"descripcion\":\"mensaje respectivo a la entrega cadena de texto no mayor a 200 caracteres\"\n}\n```\n\n## 500\n\n```javascript\n{\n  \"error\": true,\n  \"descripcion\":\"mensaje respectivo a la entrega cadena de texto no mayor a 200 caracteres\"\n}\n```\n\n# Tablas\n\n## tipo documento\n\n| Codigo | Descripcion |\n| ------ | ------ |\n| Invoice | factura |\n| CreditNote | nota credito |\n| DebitNote | nota debito|",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "recepcion documento",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "2033b0cc-3f18-464a-b3cd-09bdb1cbb1d6",
+						"exec": [
+							"function guid() {\r",
+							"  function s4() {\r",
+							"    return Math.floor((1 + Math.random()) * 0x10000)\r",
+							"      .toString(16)\r",
+							"      .substring(1);\r",
+							"  }\r",
+							"  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();\r",
+							"}\r",
+							"\r",
+							"pm.environment.set(\"GUUID\", guid());"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"numeroDocumento\":\"321361253\",\n\t\"prefijo\":\"PRUE\",\n\t\"tipoDocumento\":\"Invoice\",\n\t\"NIT\":\"787878787\",\n\t\"XML\":\"{{BaseUrlTransfiriendo}}/data/xml/{{GUUID}}\",\n\t\"PDF\":\"{{BaseUrlTransfiriendo}}/data/pdf/{{GUUID}}\",\n\t\"anexos\":\"{{BaseUrlTransfiriendo}}/data/anexos/{{GUUID}}\"\n}"
+				},
+				"url": {
+					"raw": "{{BaseUrl}}/app/documento",
+					"host": [
+						"{{BaseUrl}}"
+					],
+					"path": [
+						"app",
+						"documento"
+					]
+				},
+				"description": "este metodo permite recibir el documento enviado por transafiriendo S.A\n\n# Respuesta\n\nuna ves el api reciba los datos debera ejecutar el siguiente proceso\n\nabrir cada una de la URL entregadas haciendo un get y en la cabecera de la peticion enviar un token entregado por transfiriendo S.A si todo es correcto debera descargar el binario correspondiente, de otra forma se enviara un mensaje de error.\n\n```shell\ncurl -X GET \\\n  https://dominio.com/data/xml/a4b1aeac-c98f-4027-808a-c4e477f3be9a \\\n  -H 'Authorization: {{token}}' \\\n  -H 'cache-control: no-cache'\n```\n\n## Descarga exitosa\n\nen caso de que todo el proceso este correcto se generar un codigo de respuesta 200 y se prodra realizar la descarga del binario en los siguientes formatos\n\n| Formato | Descripcion |\n| ------ | ------ |\n| XML | aplica para el formato UBL 2.0 |\n| PDF | aplica para la representacion grafica |\n| ZIP | aplica para el conjunto de anexos al documento |\n\n## Descarga erronea\n\nse generar un codigo de respuesta 500 con un mensaje con la siguiente estructura\n\n```shell\nHTTP/1.1 500\nstatus: 500\ncontent-type: application/json; charset=utf-8\n\n{\n  \"error\": true,\n  \"descripcion\": \"no se logro obtener la informacion solcitada\"\n}\n```\n\n"
+			},
+			"response": [
+				{
+					"name": "401",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"numeroDocumento\":\"321361253\",\n\t\"prefijo\":\"PRUE\",\n\t\"tipoDocumento\":\"Invoice\",\n\t\"NIT\":\"787878787\",\n\t\"XML\":\"{{BaseUrlTransfiriendo}}/data/xml/{{GUUID}}\",\n\t\"PDF\":\"{{BaseUrlTransfiriendo}}/data/pdf/{{GUUID}}\",\n\t\"anexos\":\"{{BaseUrlTransfiriendo}}/data/anexos/{{GUUID}}\"\n}"
+						},
+						"url": {
+							"raw": "{{BaseUrl}}/app/documento",
+							"host": [
+								"{{BaseUrl}}"
+							],
+							"path": [
+								"app",
+								"documento"
+							]
+						}
+					},
+					"status": "Unauthorized",
+					"code": 401,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Access-Control-Allow-Headers",
+							"value": "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+						},
+						{
+							"key": "Access-Control-Allow-Methods",
+							"value": "GET, POST, PUT, DELETE, OPTIONS"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "61"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"3d-EG7iO2mspU7RWBBNosNU8k142ic\""
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 26 Oct 2018 20:29:54 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": true,\n    \"descripcion\": \"no se logro verificar el token\"\n}"
+				},
+				{
+					"name": "200",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"numeroDocumento\":\"321361253\",\n\t\"prefijo\":\"PRUE\",\n\t\"tipoDocumento\":\"Invoice\",\n\t\"NIT\":\"787878787\",\n\t\"XML\":\"{{BaseUrlTransfiriendo}}/data/xml/{{GUUID}}\",\n\t\"PDF\":\"{{BaseUrlTransfiriendo}}/data/pdf/{{GUUID}}\",\n\t\"anexos\":\"{{BaseUrlTransfiriendo}}/data/anexos/{{GUUID}}\"\n}"
+						},
+						"url": {
+							"raw": "{{BaseUrl}}/app/documento",
+							"host": [
+								"{{BaseUrl}}"
+							],
+							"path": [
+								"app",
+								"documento"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Access-Control-Allow-Headers",
+							"value": "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+						},
+						{
+							"key": "Access-Control-Allow-Methods",
+							"value": "GET, POST, PUT, DELETE, OPTIONS"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "69"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"45-IyoMejyqrouHJ4bq2pJNXmUvLq8\""
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 26 Oct 2018 20:29:05 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": false,\n    \"descripcion\": \"se recibio el documento correctamente\"\n}"
+				},
+				{
+					"name": "500",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "{{Token}}",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"numeroDocumento\":\"321361253\",\n\t\"prefijo\":\"PRUE\",\n\t\"tipoDocumento\":\"Invoice\",\n\t\"NIT\":\"787878787\",\n\t\"XML\":\"{{BaseUrlTransfiriendo}}/data/xml/{{GUUID}}\",\n\t\"PDF\":\"{{BaseUrlTransfiriendo}}/data/pdf/{{GUUID}}\",\n\t\"anexos\":\"{{BaseUrlTransfiriendo}}/data/anexos/{{GUUID}}\"\n}"
+						},
+						"url": {
+							"raw": "{{BaseUrl}}/app/documento",
+							"host": [
+								"{{BaseUrl}}"
+							],
+							"path": [
+								"app",
+								"documento"
+							]
+						}
+					},
+					"status": "Internal Server Error",
+					"code": 500,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "*"
+						},
+						{
+							"key": "Access-Control-Allow-Headers",
+							"value": "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"
+						},
+						{
+							"key": "Access-Control-Allow-Methods",
+							"value": "GET, POST, PUT, DELETE, OPTIONS"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "72"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"48-q/RqIcNWZYOrlXlWyjeVcYC1Jzc\""
+						},
+						{
+							"key": "Date",
+							"value": "Fri, 26 Oct 2018 20:30:50 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"error\": true,\n    \"descripcion\": \"el provedor 347832784 no esta configurado\"\n}"
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "ae09bc43-4efd-4d9b-a07d-aa356159e13b",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "5ddb5780-1da3-4e2d-8b83-b85e7f9b153e",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
